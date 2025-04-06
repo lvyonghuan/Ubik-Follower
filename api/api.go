@@ -61,6 +61,8 @@ func InitAPI(engine *engine.UFollower) error {
 		plugin.PUT("/output")
 	}
 
+	engine.Log.Info("Ubik-Follower running now, listening on " + engine.Config.Port)
+	
 	err := r.Run(engine.Config.Port)
 	if err != nil {
 		return uerr.NewError(err)

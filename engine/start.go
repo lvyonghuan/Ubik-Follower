@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/lvyonghuan/Ubik-Util/uerr"
 )
@@ -36,14 +37,19 @@ func startPluginOnWindows(plugin *Plugin, engine *UFollower) error {
 	pluginName, port, pluginPath := getStartInfo(plugin, engine)
 
 	//stitch the path
-	pluginPath = splicePath(pluginPath, pluginName, winSuffix)
+	pluginSciptPath := splicePath(pluginPath, pluginName, winSuffix)
 
 	//execute the bat file
 	//passing in port parameters
-	cmd := exec.Command(pluginPath, port)
+	absPath, err := filepath.Abs(pluginSciptPath)
+	if err != nil {
+		return uerr.NewError(err)
+	}
+	cmd := exec.Command(absPath, port)
+	cmd.Dir = spliceWorkDir(pluginPath, pluginName)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	err := cmd.Start()
+	err = cmd.Start()
 	if err != nil {
 		return uerr.NewError(err)
 	}
@@ -106,6 +112,10 @@ const (
 	macSuffix   = ".sh"
 )
 
+func spliceWorkDir(pluginPath, pluginName string) string {
+	return pluginPath + pluginName + "/"
+}
+
 func splicePath(pluginPath, pluginName, suffix string) string {
-	return pluginPath + "/" + pluginName + suffix
+	return spliceWorkDir(pluginPath, pluginName) + pluginName + suffix
 }
