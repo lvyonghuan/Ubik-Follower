@@ -3,6 +3,8 @@ package engine
 import (
 	"bytes"
 	"net/http"
+	"net/url"
+	"strconv"
 
 	"github.com/lvyonghuan/Ubik-Util/uerr"
 	"github.com/lvyonghuan/Ubik-Util/ujson"
@@ -57,14 +59,24 @@ func (engine *UFollower) setParamsToRuntimeNodes(nodes map[int]*RuntimeNode) err
 	for _, node := range nodes {
 		//If >0, prof it has params, then set the params
 		if len(node.params) > 0 {
-			url := node.pluginInfo.PluginMetaData.Uri + setParams
+			baseUrl, err := url.Parse(node.pluginInfo.PluginMetaData.Uri + setParams)
+			if err != nil {
+				engine.Log.Error(uerr.NewError(err))
+				continue
+			}
+
+			//Set the node id to the url
+			q := baseUrl.Query()
+			q.Set("id", strconv.Itoa(node.ID))
+			baseUrl.RawQuery = q.Encode()
+
 			jsonData, err := ujson.Marshal(node.params)
 			if err != nil {
 				engine.Log.Error(uerr.NewError(err))
 				continue
 			}
 
-			req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonData))
+			req, err := http.NewRequest("PUT", baseUrl.String(), bytes.NewBuffer(jsonData))
 			if err != nil {
 				engine.Log.Error(uerr.NewError(err))
 				continue
