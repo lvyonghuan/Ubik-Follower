@@ -5,17 +5,17 @@ import "testing"
 func TestAddNode(t *testing.T) {
 	uFollower := InitEngine(true)
 
-	err := uFollower.NewRuntimeNode("example", "StartNode", 1)
+	err := uFollower.NewRuntimeNode("AddNum", "startNode", 1)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = uFollower.NewRuntimeNode("example", "ProcessNode", 2)
+	err = uFollower.NewRuntimeNode("AddNum", "selfIncreasingNode", 2)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = uFollower.NewRuntimeNode("example", "OutputNode", 3)
+	err = uFollower.NewRuntimeNode("AddNum", "sumNode", 3)
 	if err != nil {
 		t.Error(err)
 	}
@@ -24,17 +24,17 @@ func TestAddNode(t *testing.T) {
 func TestDeleteNode(t *testing.T) {
 	uFollower := InitEngine(true)
 
-	err := uFollower.NewRuntimeNode("example", "StartNode", 1)
+	err := uFollower.NewRuntimeNode("AddNum", "startNode", 1)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = uFollower.NewRuntimeNode("example", "ProcessNode", 2)
+	err = uFollower.NewRuntimeNode("AddNum", "selfIncreasingNode", 2)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = uFollower.NewRuntimeNode("example", "OutputNode", 3)
+	err = uFollower.NewRuntimeNode("AddNum", "sumNode", 3)
 	if err != nil {
 		t.Error(err)
 	}
@@ -48,32 +48,41 @@ func TestDeleteNode(t *testing.T) {
 func TestUpdateEdge(t *testing.T) {
 	uFollower := InitEngine(true)
 
-	err := uFollower.NewRuntimeNode("example", "StartNode", 1)
+	err := uFollower.NewRuntimeNode("AddNum", "startNode", 1)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = uFollower.NewRuntimeNode("example", "ProcessNode", 2)
+	err = uFollower.NewRuntimeNode("AddNum", "selfIncreasingNode", 2)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = uFollower.NewRuntimeNode("example", "OutputNode", 3)
+	err = uFollower.NewRuntimeNode("AddNum", "sumNode", 3)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = uFollower.UpdateEdge(1, 2, "text", "inputText")
+	// Connect the num_a output of startNode to the num_a input of sumNode
+	err = uFollower.UpdateEdge(1, 3, "num_a", "num_a")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = uFollower.UpdateEdge(1, 3, "text", "data")
+	// Connect the num_a output of startNode to the input of selfIncreasingNode
+	err = uFollower.UpdateEdge(1, 2, "num_a", "input")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = uFollower.UpdateEdge(2, 3, "processedData", "data")
+	// Connect the num_b output of selfIncreasingNode to the num_b input of sumNode
+	err = uFollower.UpdateEdge(2, 3, "num_b", "num_b")
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Just test: connect the num_a output of startNode to the num_b input of sumNode
+	err = uFollower.UpdateEdge(1, 3, "num_a", "num_b")
 	if err != nil {
 		t.Error(err)
 	}
@@ -82,42 +91,44 @@ func TestUpdateEdge(t *testing.T) {
 func TestDeleteEdge(t *testing.T) {
 	uFollower := InitEngine(true)
 
-	err := uFollower.NewRuntimeNode("example", "StartNode", 1)
+	err := uFollower.NewRuntimeNode("AddNum", "startNode", 1)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = uFollower.NewRuntimeNode("example", "ProcessNode", 2)
+	err = uFollower.NewRuntimeNode("AddNum", "selfIncreasingNode", 2)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = uFollower.NewRuntimeNode("example", "OutputNode", 3)
+	err = uFollower.NewRuntimeNode("AddNum", "sumNode", 3)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = uFollower.UpdateEdge(1, 2, "text", "inputText")
+	// 添加边
+	err = uFollower.UpdateEdge(1, 3, "num_a", "num_a")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = uFollower.UpdateEdge(1, 3, "text", "data")
+	err = uFollower.UpdateEdge(1, 2, "num_a", "input")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = uFollower.UpdateEdge(2, 3, "processedData", "data")
+	err = uFollower.UpdateEdge(2, 3, "num_b", "num_b")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = uFollower.DeleteEdge(1, 2, "text", "inputText")
+	// 删除边
+	err = uFollower.DeleteEdge(1, 2, "num_a", "input")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = uFollower.DeleteEdge(2, 3, "processedData", "data")
+	err = uFollower.DeleteEdge(2, 3, "num_b", "num_b")
 	if err != nil {
 		t.Error(err)
 	}
