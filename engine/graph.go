@@ -28,7 +28,7 @@ func (engine *UFollower) NewRuntimeNode(pluginName, nodeName string, id int) err
 		NodeName:    nodeName,
 		pluginInfo:  plugin,
 		params:      make(uplugin.Params),
-		inputEdges:  make(map[string]Edge),
+		inputEdges:  make(map[string][]Edge),
 		OutputEdges: make(map[string][]Edge),
 	}
 
@@ -55,11 +55,13 @@ func (engine *UFollower) DeleteRuntimeNode(id int) error {
 		return uerr.NewError(errors.New("runtime node" + strconv.Itoa(id) + "not exist"))
 	} else {
 		//delete input edges
-		for portName, edge := range runtimeNode.inputEdges {
-			err := engine.DeleteEdge(edge.ProducerID, id, edge.ProducerPortName, portName)
-			if err != nil {
-				engine.Log.Error(err)
-				continue
+		for portName, edges := range runtimeNode.inputEdges {
+			for _, edge := range edges {
+				err := engine.DeleteEdge(edge.ProducerID, id, edge.ProducerPortName, portName)
+				if err != nil {
+					engine.Log.Error(err)
+					continue
+				}
 			}
 		}
 
@@ -111,7 +113,7 @@ func (engine *UFollower) UpdateEdge(producerID, consumerID int, producerPortName
 	}
 
 	producer.OutputEdges[producerPortName] = append(producer.OutputEdges[producerPortName], edge)
-	consumer.inputEdges[consumerPortName] = edge //will overwrite the old edge
+	consumer.inputEdges[consumerPortName] = append(consumer.inputEdges[consumerPortName], edge)
 
 	engine.Log.Debug("Edge updated between runtime node " + strconv.Itoa(producerID) + " and " + strconv.Itoa(consumerID))
 
@@ -131,16 +133,26 @@ func (engine *UFollower) DeleteEdge(producerID, consumerID int, producerPortName
 	}
 
 	//Delete the edge from the producer's output edges
+	//Two points can determine a straight line,
+	//while ID and port name can determine a point
 	edges := producer.OutputEdges[producerPortName]
 	for i, edge := range edges {
-		if edge == consumer.inputEdges[consumerPortName] {
+		//Check if the edge is the one to be deleted
+		if edge.ConsumerPortName == consumerPortName && edge.ConsumerID == consumerID {
 			producer.OutputEdges[producerPortName] = append(edges[:i], edges[i+1:]...)
 			break
 		}
 	}
 
-	//Delete the edge from the consumer's input edges
-	delete(consumer.inputEdges, consumerPortName)
+	//Delete the edge from the consumer's input edges. Same as above.
+	edges = consumer.inputEdges[consumerPortName]
+	for i, edge := range edges {
+		//Check if the edge is the one to be deleted
+		if edge.ProducerPortName == producerPortName && edge.ProducerID == producerID {
+			consumer.inputEdges[consumerPortName] = append(edges[:i], edges[i+1:]...)
+			break
+		}
+	}
 
 	engine.Log.Debug("Edge deleted between runtime node " + strconv.Itoa(producerID) + " and " + strconv.Itoa(consumerID))
 
