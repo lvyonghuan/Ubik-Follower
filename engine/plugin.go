@@ -34,7 +34,7 @@ type RuntimeNode struct {
 	pluginInfo *Plugin
 
 	params      uplugin.Params
-	inputEdges  map[string]Edge   //An input port can only have one input edge
+	inputEdges  map[string][]Edge //An input port can have multiple input edges
 	OutputEdges map[string][]Edge `json:"output_edges"` //A output port can have multiple output edges
 }
 
