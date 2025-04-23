@@ -1,10 +1,10 @@
 {
   "port": "127.0.0.1:42424",
-  "plugin_path": "./plugins/",
+  "plugin_path": "../plugins/",
   "leader_url": "localhost:24242",
   "log":{
     "level": 5,
     "is_save": true,
-    "save_path": "./logs/"
+    "save_path": "../logs/"
   }
 }

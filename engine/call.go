@@ -28,8 +28,8 @@ func (engine *UFollower) initPluginNodes(plugin *Plugin) {
 		return
 	}
 
-	url := plugin.PluginMetaData.Uri + initNodes
-	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonData))
+	u := plugin.PluginMetaData.Uri + initNodes
+	req, err := http.NewRequest("PUT", u, bytes.NewBuffer(jsonData))
 	if err != nil {
 		engine.Log.Error(uerr.NewError(err))
 		return
@@ -94,8 +94,8 @@ func (engine *UFollower) setParamsToRuntimeNodes(nodes map[int]*RuntimeNode) err
 }
 
 func (engine *UFollower) callPluginToRun(plugin *Plugin) error {
-	url := plugin.PluginMetaData.Uri + run
-	req, err := http.NewRequest("GET", url, nil)
+	u := plugin.PluginMetaData.Uri + run
+	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
 		return uerr.NewError(err)
 	}

@@ -176,14 +176,19 @@ func (engine *UFollower) InitPluginsNodes() {
 
 // WaitPrepare will block until all plugins are prepared
 func (engine *UFollower) WaitPrepare() {
+	engine.Log.Info("Start waiting for plugins to prepare...")
+
 	blockChannels := engine.plugin.waitRunningBlockingChannels
 	for _, blockChan := range blockChannels {
 		//wait for the signal
 		<-blockChan
 	}
+
+	engine.Log.Info("All plugins are prepared, continue to run plugins...")
 }
 
 func (engine *UFollower) RunPlugins() error {
+	engine.Log.Info("Start running plugins...")
 	for _, plugin := range engine.plugin.mountedPlugins {
 		err := engine.callPluginToRun(plugin)
 		if err != nil {
