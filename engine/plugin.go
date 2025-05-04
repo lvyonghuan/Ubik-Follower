@@ -41,7 +41,7 @@ type RuntimeNode struct {
 // Edge is a directed edge, from producer to consumer
 type Edge struct {
 	//The uri point to the consumer PLUGIN.
-	//If uri not nil, node can sends output directly to the next node
+	//If uri is not nil, node can send output directly to the next node
 	Uri string `json:"uri"`
 
 	ProducerID       int    `json:"producer_id"`
@@ -98,7 +98,7 @@ func (engine *UFollower) checkUnmount(plugin *Plugin) {
 	plugin.checkMutex.Unlock()
 }
 
-//// When edge want follower to forward its message,
+//// When edge wants follower to forward its message,
 //// a disguised runtime node will be generated
 //func (engine *UFollower) generateDisguisedRuntimeNode() *RuntimeNode {
 //

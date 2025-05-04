@@ -6,6 +6,8 @@ import (
 )
 
 type UFollower struct {
+	UUID string //Unique identifier for the follower
+
 	Config Config
 	Log    *ulog.Log
 	OpType string

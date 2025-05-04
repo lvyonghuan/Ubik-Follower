@@ -5,6 +5,7 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/google/uuid"
 	"github.com/lvyonghuan/Ubik-Util/uconfig"
 	"github.com/lvyonghuan/Ubik-Util/uerr"
 	"github.com/lvyonghuan/Ubik-Util/ulog"
@@ -15,12 +16,12 @@ func InitEngine(inTest bool) *UFollower {
 	var err error
 
 	if !inTest {
-		config, err = readConfig(configPath)
+		config, err = readConfig(confPath + "/config.json")
 		if err != nil {
 			fatalErrHandel(err)
 		}
 	} else {
-		config, err = readConfig(testConfigPath)
+		config, err = readConfig(testConfPath + "/config.json")
 		if err != nil {
 			fatalErrHandel(err)
 		}
@@ -29,6 +30,20 @@ func InitEngine(inTest bool) *UFollower {
 	engine, err := makeUFollower(config)
 	if err != nil {
 		fatalErrHandel(err)
+	}
+
+	if !inTest {
+		err := engine.getUUID(confPath + "/uuid")
+		if err != nil {
+			engine.Log.Fatal(err)
+			os.Exit(1)
+		}
+	} else {
+		err := engine.getUUID(testConfPath + "/uuid")
+		if err != nil {
+			engine.Log.Fatal(err)
+			os.Exit(1)
+		}
 	}
 
 	engine.Log.Info("Scanning plugins...")
@@ -48,7 +63,7 @@ func readConfig(configPath string) (Config, error) {
 	var config Config
 	err := uconfig.Read(configPath, &config)
 	if err != nil {
-		return config, uerr.NewError(err)
+		return config, err
 	}
 	return config, nil
 }
@@ -75,6 +90,56 @@ func (engine *UFollower) detectOpType() {
 	} else {
 		fatalErrHandel(uerr.NewError(errors.New("unsupported operating system " + runtime.GOOS)))
 	}
+}
+
+func (engine *UFollower) getUUID(uuidPath string) error {
+	engine.Log.Debug("Starter read UUID from " + uuidPath)
+	//Check if the file exists
+	_, err := os.Stat(uuidPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			//Create UUID for follower
+			err = engine.createUUID(uuidPath)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		} else {
+			return uerr.NewError(err)
+		}
+	}
+
+	content, err := os.ReadFile(uuidPath)
+	if err != nil {
+		return uerr.NewError(err)
+	}
+
+	engine.UUID = string(content)
+	engine.Log.Debug("Get UUID: " + engine.UUID)
+	return nil
+}
+
+func (engine *UFollower) createUUID(uuidPath string) error {
+	//Create the file
+	file, err := os.Create(uuidPath)
+	if err != nil {
+		return uerr.NewError(err)
+	}
+	defer file.Close()
+
+	//Generate a new UUID
+	u := uuid.New()
+
+	//Write the UUID to the file
+	_, err = file.WriteString(u.String())
+	if err != nil {
+		return uerr.NewError(err)
+	}
+
+	engine.UUID = u.String()
+	engine.Log.Debug("Create UUID: " + engine.UUID)
+	return nil
 }
 
 func makeUFollower(config Config) (*UFollower, error) {

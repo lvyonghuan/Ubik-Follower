@@ -21,7 +21,7 @@ const (
 func (engine *UFollower) initPluginNodes(plugin *Plugin) {
 	nodes := plugin.runtimeNodes
 
-	//Marshal the nodes data
+	//Marshal the node data
 	jsonData, err := ujson.Marshal(nodes)
 	if err != nil {
 		engine.Log.Error(uerr.NewError(err))

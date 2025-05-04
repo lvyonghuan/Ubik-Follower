@@ -1,7 +1,9 @@
 package engine
 
-const configPath = "./conf/config.json"
-const testConfigPath = "../conf/config.json"
+const (
+	confPath     = "./conf"
+	testConfPath = "../conf"
+)
 
 type Config struct {
 	Port       string `json:"port"`

@@ -37,11 +37,11 @@ func startPluginOnWindows(plugin *Plugin, engine *UFollower) error {
 	pluginName, port, pluginPath := getStartInfo(plugin, engine)
 
 	//stitch the path
-	pluginSciptPath := splicePath(pluginPath, pluginName, winSuffix)
+	pluginScriptPath := splicePath(pluginPath, pluginName, winSuffix)
 
 	//execute the bat file
 	//passing in port parameters
-	absPath, err := filepath.Abs(pluginSciptPath)
+	absPath, err := filepath.Abs(pluginScriptPath)
 	if err != nil {
 		return uerr.NewError(err)
 	}
