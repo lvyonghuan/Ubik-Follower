@@ -56,6 +56,9 @@ func InitEngine(inTest bool) *UFollower {
 	engine.detectOpType() //detect the operating system type
 	engine.Log.Debug("Operating system type: " + engine.OpType)
 
+	//Connect to the leader
+	engine.detectLeader()
+
 	return engine
 }
 
