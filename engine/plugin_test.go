@@ -37,32 +37,32 @@ func TestRunPlugin(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = e.UpdateEdge(1, 3, "num_a", "num_a")
+	err = e.UpdateEdge(1, 3, "num_a", "num_a", "http://localhost:14535/input")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = e.UpdateEdge(1, 2, "num_a", "input")
+	err = e.UpdateEdge(1, 2, "num_a", "input", "http://localhost:14535/input")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = e.UpdateEdge(2, 3, "num_b", "num_b")
+	err = e.UpdateEdge(2, 3, "num_b", "num_b", "http://localhost:14535/input")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = e.UpdateEdge(1, 4, "cycle_num", "input")
+	err = e.UpdateEdge(1, 4, "cycle_num", "input", "http://localhost:14535/input")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = e.UpdateEdge(4, 1, "num_b", "current_cycle_num")
+	err = e.UpdateEdge(4, 1, "num_b", "current_cycle_num", "http://localhost:14535/input")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = e.UpdateEdge(3, 1, "sum", "num_a")
+	err = e.UpdateEdge(3, 1, "sum", "num_a", "http://localhost:14535/input")
 	if err != nil {
 		t.Error(err)
 	}

@@ -1,12 +1,15 @@
 package engine
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
 	"time"
 
 	"github.com/lvyonghuan/Ubik-Util/uerr"
+	"github.com/lvyonghuan/Ubik-Util/ujson"
+	"github.com/lvyonghuan/Ubik-Util/uplugin"
 )
 
 //communicate with the leader
@@ -47,6 +50,7 @@ func (engine *UFollower) findLeaderByURL() error {
 	defer resp.Body.Close()
 
 	// Check the response status code
+	//TODO:检查消息体的状态码
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
 		return uerr.NewError(fmt.Errorf("leader responded with status code %d: %s", resp.StatusCode, string(body)))
@@ -61,16 +65,37 @@ func (engine *UFollower) broadCastToFindLeader() error {
 	return nil
 }
 
-//func (engine *UFollower) postPlugins() error {
-//	//get all plugin metadata
-//	var plugins []uplugin.Plugin
-//	for _, plugin := range engine.plugin.plugins {
-//		plugins = append(plugins, *plugin.PluginMetaData)
-//	}
-//
-//	//marshal the plugin metadata into JSON
-//	jsonData, err := ujson.Marshal(plugins)
-//	if err != nil {
-//		return err
-//	}
-//}
+func (engine *UFollower) postPlugins() error {
+	url := engine.Config.LeaderUrl + "/follower" + "/list"
+	reqURL := url + "?UUID=" + engine.UUID
+
+	//get all plugin metadata
+	plugins := make(map[string]*uplugin.Plugin)
+	for _, plugin := range engine.plugin.plugins {
+		plugins[plugin.PluginMetaData.Name] = plugin.PluginMetaData
+	}
+
+	//marshal the plugin metadata into JSON
+	jsonData, err := ujson.Marshal(plugins)
+	if err != nil {
+		return err
+	}
+
+	//send the JSON to the leader
+	resp, err := http.Post(reqURL, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return uerr.NewError(fmt.Errorf("failed to connect to leader: %v", err))
+	}
+
+	defer resp.Body.Close()
+	// Check the response status code
+	//TODO:检查消息体的状态码
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return uerr.NewError(fmt.Errorf("leader responded with status code %d: %s", resp.StatusCode, string(body)))
+	}
+
+	// Successfully post the plugin list to the leader
+	engine.Log.Info("Successfully post the plugin list to leader")
+	return nil
+}

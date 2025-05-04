@@ -58,6 +58,12 @@ func InitEngine(inTest bool) *UFollower {
 
 	//Connect to the leader
 	engine.detectLeader()
+	//Post the plugin list to leader
+	err = engine.postPlugins()
+	if err != nil { //TODO：重试机制
+		engine.Log.Fatal(err)
+		os.Exit(1)
+	}
 
 	return engine
 }

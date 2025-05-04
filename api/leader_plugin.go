@@ -72,6 +72,7 @@ func updateEdge(c *gin.Context) {
 	consumerIDString := c.Query("consumer_id")
 	producerPortName := c.Query("producer_port_name")
 	consumerPortName := c.Query("consumer_port_name")
+	uri := c.Query("uri")
 
 	producerID, err := strconv.Atoi(producerIDString)
 	if err != nil {
@@ -83,7 +84,7 @@ func updateEdge(c *gin.Context) {
 		errorResponse(c, 400, "consumer_id err: "+err.Error())
 	}
 
-	err = engine.UpdateEdge(producerID, consumerID, producerPortName, consumerPortName)
+	err = engine.UpdateEdge(producerID, consumerID, producerPortName, consumerPortName, uri)
 	if err != nil {
 		errorResponse(c, 400, err.Error())
 	}
