@@ -64,6 +64,12 @@ func InitEngine(inTest bool) *UFollower {
 		engine.Log.Fatal(err)
 		os.Exit(1)
 	}
+	//Start heartbeat
+	err = engine.initHeartbeat()
+	if err != nil {
+		engine.Log.Fatal(err)
+		os.Exit(1)
+	}
 
 	return engine
 }

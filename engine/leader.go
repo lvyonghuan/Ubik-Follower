@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/lvyonghuan/Ubik-Util/uerr"
@@ -94,8 +96,90 @@ func (engine *UFollower) postPlugins() error {
 		body, _ := io.ReadAll(resp.Body)
 		return uerr.NewError(fmt.Errorf("leader responded with status code %d: %s", resp.StatusCode, string(body)))
 	}
-
 	// Successfully post the plugin list to the leader
 	engine.Log.Info("Successfully post the plugin list to leader")
+	return nil
+}
+
+type heartbeat struct {
+	conn     *net.UDPConn
+	interval time.Duration
+}
+
+type heartbeatPacket struct {
+	UUID string `json:"UUID"`
+}
+
+func (engine *UFollower) initHeartbeat() error {
+	engine.heartbeat = &heartbeat{}
+
+	// Initialize the heartbeat sender
+	engine.heartbeat.interval = time.Duration(engine.Config.HeartBeatInterval) * time.Second
+
+	// Start sending heartbeats to the leader
+	err := engine.startHeartbeat()
+	if err != nil {
+		return uerr.NewError(err)
+	}
+
+	engine.Log.Debug("Heartbeat sender initialized")
+	return nil
+}
+
+func (engine *UFollower) startHeartbeat() error {
+	parsedURL, err := url.Parse(engine.Config.LeaderUrl)
+	if err != nil {
+		return uerr.NewError(err)
+	}
+
+	// Create a UDP connection
+	addr, err := net.ResolveUDPAddr("udp", ":"+parsedURL.Port())
+	if err != nil {
+		return uerr.NewError(err)
+	}
+
+	conn, err := net.DialUDP("udp", nil, addr)
+	if err != nil {
+		return uerr.NewError(err)
+	}
+	engine.heartbeat.conn = conn
+
+	// Start sending heartbeats at regular intervals
+	ticker := time.NewTicker(engine.heartbeat.interval)
+
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				err := engine.sendHeartbeat()
+				if err != nil {
+					engine.Log.Error(uerr.NewError(err))
+				}
+			}
+		}
+	}()
+
+	return nil
+}
+
+func (engine *UFollower) sendHeartbeat() error {
+	// Create a heartbeat packet
+	packet := heartbeatPacket{
+		UUID: engine.UUID,
+	}
+
+	// Marshal the packet to JSON
+	jsonData, err := ujson.Marshal(packet)
+	if err != nil {
+		return uerr.NewError(err)
+	}
+
+	// Send the heartbeat packet to the leader
+	_, err = engine.heartbeat.conn.Write(jsonData)
+	if err != nil {
+		return uerr.NewError(err)
+	}
+
+	engine.Log.Debug("Heartbeat sent to leader")
 	return nil
 }

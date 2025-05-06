@@ -19,6 +19,8 @@ type UFollower struct {
 	plugin *plugin
 
 	runtimeNodes map[int]*RuntimeNode
+
+	heartbeat *heartbeat
 }
 
 type plugin struct {
