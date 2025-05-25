@@ -18,7 +18,7 @@ import (
 
 func (engine *UFollower) detectLeader() {
 	for {
-		if engine.Config.LeaderUrl != "" {
+		if engine.Config.LeaderAddr != "" {
 			err := engine.findLeaderByURL()
 			if err != nil {
 				engine.Log.Error(err)
@@ -39,11 +39,11 @@ func (engine *UFollower) detectLeader() {
 }
 
 func (engine *UFollower) findLeaderByURL() error {
-	url := engine.Config.LeaderUrl + "/follower" + "/init"
+	url := engine.Config.LeaderAddr + "/follower" + "/init"
 
 	// Prepare the request URL with UUID
-	reqURL := url + "?UUID=" + engine.UUID + "?/Addr=" + engine.Config.IP + ":" + engine.Config.Port
-
+	reqURL := url + "?UUID=" + engine.UUID + "&Addr=" + engine.Config.IP + ":" + engine.Config.Port
+	
 	// Send a GET request to the leader
 	resp, err := http.Get(reqURL)
 	if err != nil {
@@ -68,7 +68,7 @@ func (engine *UFollower) broadCastToFindLeader() error {
 }
 
 func (engine *UFollower) postPlugins() error {
-	url := engine.Config.LeaderUrl + "/follower" + "/list"
+	url := engine.Config.LeaderAddr + "/follower" + "/list"
 	reqURL := url + "?UUID=" + engine.UUID
 
 	//get all plugin metadata
@@ -127,7 +127,7 @@ func (engine *UFollower) initHeartbeat() error {
 }
 
 func (engine *UFollower) startHeartbeat() error {
-	parsedURL, err := url.Parse(engine.Config.LeaderUrl)
+	parsedURL, err := url.Parse(engine.Config.LeaderAddr)
 	if err != nil {
 		return uerr.NewError(err)
 	}

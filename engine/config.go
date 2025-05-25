@@ -12,7 +12,7 @@ type Config struct {
 	HeartBeatInterval int    `json:"heartbeat_interval"` //Heartbeat interval in seconds
 	Log               Log    `json:"log"`
 
-	LeaderUrl string `json:"leader_url"` //Leader url, if null will broadcast to find leader
+	LeaderAddr string `json:"leader_addr"` //Leader url, if null will broadcast to find leader
 }
 
 type Log struct {
