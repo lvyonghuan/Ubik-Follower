@@ -94,7 +94,7 @@ func (engine *UFollower) UpdateEdge(producerID, consumerID int, producerPortName
 		ProducerPortName: producerPortName,
 		ConsumerPortName: consumerPortName,
 		channel:          make(chan []byte),
-		Uri:              uri,
+		Addr:             uri,
 	}
 
 	producer.OutputEdges[producerPortName] = append(producer.OutputEdges[producerPortName], edge)

@@ -34,7 +34,7 @@ func startPlugin(plugin *Plugin, e *UFollower) error {
 }
 
 func startPluginOnWindows(plugin *Plugin, engine *UFollower) error {
-	pluginName, port, pluginPath := getStartInfo(plugin, engine)
+	pluginName, addr, pluginPath := getStartInfo(plugin, engine)
 
 	//stitch the path
 	pluginScriptPath := splicePath(pluginPath, pluginName, winSuffix)
@@ -45,7 +45,7 @@ func startPluginOnWindows(plugin *Plugin, engine *UFollower) error {
 	if err != nil {
 		return uerr.NewError(err)
 	}
-	cmd := exec.Command(absPath, port)
+	cmd := exec.Command(absPath, addr)
 	cmd.Dir = spliceWorkDir(pluginPath, pluginName)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -58,14 +58,14 @@ func startPluginOnWindows(plugin *Plugin, engine *UFollower) error {
 }
 
 func startPluginOnLinux(plugin *Plugin, engine *UFollower) error {
-	pluginName, port, pluginPath := getStartInfo(plugin, engine)
+	pluginName, addr, pluginPath := getStartInfo(plugin, engine)
 
 	//stitch the path
 	pluginPath = splicePath(pluginPath, pluginName, linuxSuffix)
 
 	//execute the shell file
 	//passing in port parameters
-	cmd := exec.Command(pluginPath, port)
+	cmd := exec.Command(pluginPath, addr)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Start()
@@ -78,14 +78,14 @@ func startPluginOnLinux(plugin *Plugin, engine *UFollower) error {
 
 // FIXME I don't have a mac, so I can't test it
 func startPluginOnMac(plugin *Plugin, engine *UFollower) error {
-	pluginName, port, pluginPath := getStartInfo(plugin, engine)
+	pluginName, addr, pluginPath := getStartInfo(plugin, engine)
 
 	//stitch the path
 	pluginPath = splicePath(pluginPath, pluginName, macSuffix)
 
 	//execute the shell file
 	//passing in port parameters
-	cmd := exec.Command(pluginPath, port)
+	cmd := exec.Command(pluginPath, addr)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Start()
@@ -97,13 +97,13 @@ func startPluginOnMac(plugin *Plugin, engine *UFollower) error {
 }
 
 func getStartInfo(plugin *Plugin, engine *UFollower) (string, string, string) {
-	//get the follower running port and plugin save path
-	port, pluginPath := engine.Config.Port, engine.Config.PluginPath
+	//get the follower running addr and plugin save path
+	ip, port, pluginPath := engine.Config.IP, engine.Config.Port, engine.Config.PluginPath
 
 	//get the plugin name
 	pluginName := plugin.PluginMetaData.Name
 
-	return pluginName, port, pluginPath
+	return pluginName, ip + ":" + port, pluginPath
 }
 
 const (

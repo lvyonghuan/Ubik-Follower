@@ -4,7 +4,7 @@ go 1.24.2
 
 require (
 	github.com/gin-gonic/gin v1.10.0
-	github.com/lvyonghuan/Ubik-Util v0.0.9
+	github.com/lvyonghuan/Ubik-Util v0.0.10
 )
 
 require (

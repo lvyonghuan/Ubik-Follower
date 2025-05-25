@@ -19,10 +19,10 @@ func pluginInit(c *gin.Context) {
 		return
 	}
 
-	pluginURL := c.Query("plugin_url")
+	pluginURL := c.Query("plugin_addr")
 	if pluginURL == "" {
-		engine.Log.Error(errors.New("plugin " + pluginName + "'s plugin_url is empty"))
-		errorResponse(c, 400, "plugin_url is empty")
+		engine.Log.Error(errors.New("plugin " + pluginName + "'s plugin_addr is empty"))
+		errorResponse(c, 400, "plugin_addr is empty")
 		return
 	}
 
@@ -32,7 +32,7 @@ func pluginInit(c *gin.Context) {
 		errorResponse(c, 400, "plugin not found")
 		return
 	}
-	plugin.PluginMetaData.Uri = pluginURL
+	plugin.PluginMetaData.Addr = pluginURL
 
 	//FIXME Shouldn't be here. It should be in pre.
 

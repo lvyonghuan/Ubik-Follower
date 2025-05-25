@@ -28,20 +28,17 @@ func InitAPI(engine *engine.UFollower) error {
 
 	api := r.Group("/api")
 	{
-		plugin := api.Group("/plugin")
-		{
-			plugin.GET("/list", getPluginList) //get list of follower's installed plugins
-			plugin.GET("/info")                //get metadata of a plugin
-			plugin.PUT("/download")            //download a plugin. Three steps: 1. download 2. unzip 3.init
+		api.GET("/list", getPluginList) //get a list of follower's installed plugins
+		api.GET("/info")                //get metadata of a plugin
+		api.PUT("/download")            //Download a plugin. Three steps: 1. download 2. unzip 3.init
 
-			node := plugin.Group("/node")
-			{
-				node.PUT("/", addRuntimeNode)       //create a runtime node
-				node.DELETE("/", deleteRuntimeNode) //delete a runtime node
-				node.PUT("/edge", updateEdge)       //update a edge from nodeA(producer) to nodeB(consumer)
-				node.DELETE("/edge", deleteEdge)    //delete a edge from nodeA(producer) to nodeB(consumer)
-				node.PUT("/param", putParams)       //update the parameter of a node
-			}
+		node := api.Group("/node")
+		{
+			node.PUT("/", addRuntimeNode)       //create a runtime node
+			node.DELETE("/", deleteRuntimeNode) //delete a runtime node
+			node.PUT("/edge", updateEdge)       //update a edge from nodeA(producer) to nodeB(consumer)
+			node.DELETE("/edge", deleteEdge)    //delete a edge from nodeA(producer) to nodeB(consumer)
+			node.PUT("/param", putParams)       //update the parameter of a node
 		}
 
 		api.GET("/prepare", waitPrepare) //a signal to tell follower prepare to run, response when all plugins are mounted and no error
@@ -63,7 +60,7 @@ func InitAPI(engine *engine.UFollower) error {
 
 	engine.Log.Info("Ubik-Follower running now, listening on " + engine.Config.Port)
 
-	err := r.Run(":" + engine.Config.Port)
+	err := r.Run(engine.Config.IP + ":" + engine.Config.Port)
 	if err != nil {
 		return uerr.NewError(err)
 	}

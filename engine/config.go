@@ -7,6 +7,7 @@ const (
 
 type Config struct {
 	Port              string `json:"port"`
+	IP                string `json:"ip"`
 	PluginPath        string `json:"plugin_path"`
 	HeartBeatInterval int    `json:"heartbeat_interval"` //Heartbeat interval in seconds
 	Log               Log    `json:"log"`

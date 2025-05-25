@@ -42,7 +42,7 @@ func (engine *UFollower) findLeaderByURL() error {
 	url := engine.Config.LeaderUrl + "/follower" + "/init"
 
 	// Prepare the request URL with UUID
-	reqURL := url + "?UUID=" + engine.UUID
+	reqURL := url + "?UUID=" + engine.UUID + "?/Addr=" + engine.Config.IP + ":" + engine.Config.Port
 
 	// Send a GET request to the leader
 	resp, err := http.Get(reqURL)

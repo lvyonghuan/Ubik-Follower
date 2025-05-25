@@ -3,7 +3,7 @@
   "description": "This is an example plugin, for testing purposes",
   "version": "1.0.0",
   "author": "ubik",
-  "uri": "http://localhost:24242",
+  "addr": "http://localhost:24242",
   "local": true,
   "nodes": {
     "startNode": {

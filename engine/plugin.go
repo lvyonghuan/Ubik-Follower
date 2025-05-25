@@ -39,9 +39,9 @@ type RuntimeNode struct {
 
 // Edge is a directed edge, from producer to consumer
 type Edge struct {
-	//The uri point to the consumer PLUGIN.
-	//If uri is not nil, node can send output directly to the next node
-	Uri string `json:"uri"`
+	//The addr point to the consumer PLUGIN.
+	//If addr is not nil, node can send output directly to the next node
+	Addr string `json:"addr"`
 
 	ProducerID       int    `json:"producer_id"`
 	ConsumerID       int    `json:"consumer_id"`
