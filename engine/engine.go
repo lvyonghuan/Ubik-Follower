@@ -3,6 +3,7 @@ package engine
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/lvyonghuan/Ubik-Util/ulog"
+	"github.com/lvyonghuan/Ubik-Util/uplugin"
 )
 
 type UFollower struct {
@@ -40,6 +41,15 @@ func (engine *UFollower) SetGinEngine(r *gin.Engine) {
 	engine.r = r
 }
 
-func (engine *UFollower) GetPluginList() map[string]*Plugin {
-	return engine.plugin.plugins
+func (engine *UFollower) GetPluginList() map[string]uplugin.Plugin {
+	originPlugins := engine.plugin.plugins
+	plugins := make(map[string]uplugin.Plugin, len(originPlugins))
+
+	for name, p := range originPlugins {
+		metaData := p.PluginMetaData
+
+		plugins[name] = *metaData
+	}
+
+	return plugins
 }

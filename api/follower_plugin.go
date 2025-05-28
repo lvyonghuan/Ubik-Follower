@@ -32,7 +32,7 @@ func pluginInit(c *gin.Context) {
 		errorResponse(c, 400, "plugin not found")
 		return
 	}
-	plugin.PluginMetaData.Addr = pluginURL
+	plugin.Addr = pluginURL
 
 	//FIXME Shouldn't be here. It should be in pre.
 
