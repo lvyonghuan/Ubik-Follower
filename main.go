@@ -7,20 +7,22 @@ import (
 	"os/exec"
 )
 
+const inTest = false
+
 func main() {
 	// Set the terminal to UTF-8 encoding
 	cmd := exec.Command("chcp", "65001")
 	cmd.Stdout = os.Stdout
 	cmd.Run()
 
-	uFollower := engine.InitEngine(false)
+	uFollower := engine.InitEngine(inTest)
 
 	uFollower.Log.Info("Ubik-Follower is starting...")
-	initAPI(uFollower)
+	initAPI(uFollower, inTest)
 }
 
-func initAPI(e *engine.UFollower) {
-	err := api.InitAPI(e)
+func initAPI(e *engine.UFollower, inTest bool) {
+	err := api.InitAPI(e, inTest)
 	if err != nil {
 		e.Log.Fatal(err)
 	}

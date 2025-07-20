@@ -12,7 +12,7 @@ import (
 
 func TestRunPlugin(t *testing.T) {
 	e := engine.InitEngine(true)
-	go api.InitAPI(e)
+	go api.InitAPI(e, true)
 	time.Sleep(5 * time.Second)
 
 	err := e.NewRuntimeNode("AddNum", "startNode", 1)

@@ -16,8 +16,14 @@ const (
 //TODO: Authenticate the leader by middleware
 
 // InitAPI initializes the API
-func InitAPI(engine *engine.UFollower) error {
+func InitAPI(engine *engine.UFollower, inTest bool) error {
 	r := gin.Default()
+	// Set the mode based on whether it's in test or not
+	if !inTest {
+		gin.SetMode(gin.ReleaseMode)
+	} else {
+		gin.SetMode(gin.DebugMode)
+	}
 	engine.SetGinEngine(r)
 
 	//set the engine in the context
