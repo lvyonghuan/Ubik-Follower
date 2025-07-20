@@ -23,12 +23,9 @@ func errorResponse(c *gin.Context, status int, info any) {
 	c.JSON(http.StatusOK, response(status, info))
 }
 
+// fatalErrHandel handles fatal errors by logging them and returning a 500 response.
 func fatalErrHandel(c *gin.Context, err error) {
-	l := ulog.Log{
-		Level:       ulog.Debug,
-		IsSave:      true,
-		LogSavePath: "./logs",
-	}
+	l := ulog.NewLogWithoutPost(ulog.Debug, true, "./logs")
 	l.Fatal(err)
 	c.JSON(http.StatusOK, response(500, "Internal Server Error: "+err.Error()))
 	os.Exit(1)

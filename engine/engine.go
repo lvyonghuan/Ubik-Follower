@@ -10,7 +10,7 @@ type UFollower struct {
 	UUID string //Unique identifier for the follower
 
 	Config Config
-	Log    *ulog.Log
+	Log    ulog.Log
 	OpType string
 
 	status int //Ubik Follower's status

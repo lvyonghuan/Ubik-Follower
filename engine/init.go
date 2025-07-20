@@ -27,23 +27,9 @@ func InitEngine(inTest bool) *UFollower {
 		}
 	}
 
-	engine, err := makeUFollower(config)
+	engine, err := makeUFollower(config, inTest)
 	if err != nil {
 		fatalErrHandel(err)
-	}
-
-	if !inTest {
-		err := engine.getUUID(confPath + "/uuid")
-		if err != nil {
-			engine.Log.Fatal(err)
-			os.Exit(1)
-		}
-	} else {
-		err := engine.getUUID(testConfPath + "/uuid")
-		if err != nil {
-			engine.Log.Fatal(err)
-			os.Exit(1)
-		}
 	}
 
 	engine.Log.Info("Scanning plugins...")
@@ -83,15 +69,10 @@ func readConfig(configPath string) (Config, error) {
 	return config, nil
 }
 
-func initLog(log Log) *ulog.Log {
-	l := ulog.Log{
-		Level:       log.Level,
-		IsSave:      log.IsSave,
-		LogSavePath: log.LogSavePath,
-	}
-	l.InitLog()
+func initLog(config Config, uuid string) ulog.Log {
+	l := ulog.NewLogWithPost(config.Log.Level, config.Log.IsSave, config.Log.LogSavePath, config.LeaderAddr, uuid)
 
-	return &l
+	return l
 }
 
 func (engine *UFollower) detectOpType() {
@@ -108,7 +89,6 @@ func (engine *UFollower) detectOpType() {
 }
 
 func (engine *UFollower) getUUID(uuidPath string) error {
-	engine.Log.Debug("Starter read UUID from " + uuidPath)
 	//Check if the file exists
 	_, err := os.Stat(uuidPath)
 	if err != nil {
@@ -131,7 +111,6 @@ func (engine *UFollower) getUUID(uuidPath string) error {
 	}
 
 	engine.UUID = string(content)
-	engine.Log.Debug("Get UUID: " + engine.UUID)
 	return nil
 }
 
@@ -153,29 +132,45 @@ func (engine *UFollower) createUUID(uuidPath string) error {
 	}
 
 	engine.UUID = u.String()
-	engine.Log.Debug("Create UUID: " + engine.UUID)
 	return nil
 }
 
-func makeUFollower(config Config) (*UFollower, error) {
-	log := initLog(config.Log)
-	return &UFollower{
+func makeUFollower(config Config, inTest bool) (*UFollower, error) {
+	//Initialize the UFollower engine
+	engine := &UFollower{
 		Config:       config,
-		Log:          log,
 		runtimeNodes: make(map[int]*RuntimeNode),
 		plugin: &plugin{
 			plugins:        make(map[string]*Plugin),
 			mountedPlugins: make(map[string]*Plugin),
 		},
-	}, nil
+	}
+
+	//Initialize the UUID
+	if !inTest {
+		err := engine.getUUID(confPath + "/uuid")
+		if err != nil {
+			fatalErrHandel(err)
+			os.Exit(1)
+		}
+	} else {
+		err := engine.getUUID(testConfPath + "/uuid")
+		if err != nil {
+			fatalErrHandel(err)
+			os.Exit(1)
+		}
+	}
+
+	//Initialize the log
+	log := initLog(config, engine.UUID)
+	engine.Log = log
+
+	return engine, nil
 }
 
+// handel error when log isn't initialized
 func fatalErrHandel(err error) {
-	l := initLog(Log{
-		Level:       ulog.Debug,
-		IsSave:      true,
-		LogSavePath: "./logs",
-	})
+	l := ulog.NewLogWithoutPost(ulog.Debug, true, "./logs")
 	l.Fatal(err)
 	os.Exit(1)
 }

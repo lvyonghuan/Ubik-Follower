@@ -68,7 +68,7 @@ func TestRunPlugin(t *testing.T) {
 	}
 
 	params := make(uplugin.Params)
-	params["init_num"] = []byte("0")
+	params["init_num"] = []byte("0") //FIXME:[]BYTE在这里真的可行吗？
 	params["cycle_num"] = []byte("10")
 	paramsJson, err := ujson.Marshal(params)
 	if err != nil {
