@@ -43,7 +43,7 @@ func (engine *UFollower) findLeaderByURL() error {
 
 	// Prepare the request URL with UUID
 	reqURL := url + "?UUID=" + engine.UUID + "&Addr=" + engine.Config.IP + ":" + engine.Config.Port
-	
+
 	// Send a GET request to the leader
 	resp, err := http.Get(reqURL)
 	if err != nil {
@@ -132,7 +132,7 @@ func (engine *UFollower) startHeartbeat() error {
 		return uerr.NewError(err)
 	}
 
-	// Create a UDP connection
+	// Create an UDP connection
 	addr, err := net.ResolveUDPAddr("udp", ":"+parsedURL.Port())
 	if err != nil {
 		return uerr.NewError(err)
