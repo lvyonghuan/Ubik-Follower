@@ -31,11 +31,13 @@ func addRuntimeNode(c *gin.Context) {
 	id, err := strconv.Atoi(idString)
 	if err != nil {
 		errorResponse(c, 400, "id err: "+err.Error())
+		return
 	}
 
 	err = engine.NewRuntimeNode(pluginName, nodeName, id)
 	if err != nil {
 		errorResponse(c, 400, err.Error())
+		return
 	}
 
 	successResponse(c, "New runtime node created")
@@ -52,11 +54,13 @@ func deleteRuntimeNode(c *gin.Context) {
 	id, err := strconv.Atoi(idString)
 	if err != nil {
 		errorResponse(c, 400, "id err: "+err.Error())
+		return
 	}
 
 	err = engine.DeleteRuntimeNode(id)
 	if err != nil {
 		errorResponse(c, 400, err.Error())
+		return
 	}
 
 	successResponse(c, "Runtime node deleted")
@@ -72,21 +76,24 @@ func updateEdge(c *gin.Context) {
 	consumerIDString := c.Query("consumer_id")
 	producerPortName := c.Query("producer_port_name")
 	consumerPortName := c.Query("consumer_port_name")
-	uri := c.Query("uri")
+	addr := c.Query("addr")
 
 	producerID, err := strconv.Atoi(producerIDString)
 	if err != nil {
 		errorResponse(c, 400, "producer_id err: "+err.Error())
+		return
 	}
 
 	consumerID, err := strconv.Atoi(consumerIDString)
 	if err != nil {
 		errorResponse(c, 400, "consumer_id err: "+err.Error())
+		return
 	}
 
-	err = engine.UpdateEdge(producerID, consumerID, producerPortName, consumerPortName, uri)
+	err = engine.UpdateEdge(producerID, consumerID, producerPortName, consumerPortName, addr)
 	if err != nil {
 		errorResponse(c, 400, err.Error())
+		return
 	}
 
 	successResponse(c, "Edge updated")
@@ -106,16 +113,19 @@ func deleteEdge(c *gin.Context) {
 	producerID, err := strconv.Atoi(producerIDString)
 	if err != nil {
 		errorResponse(c, 400, "producer_id should be an integer")
+		return
 	}
 
 	consumerID, err := strconv.Atoi(consumerIDString)
 	if err != nil {
 		errorResponse(c, 400, "consumer_id should be an integer")
+		return
 	}
 
 	err = engine.DeleteEdge(producerID, consumerID, producerPortName, consumerPortName)
 	if err != nil {
 		errorResponse(c, 400, err.Error())
+		return
 	}
 
 	successResponse(c, "Edge deleted")
@@ -128,16 +138,22 @@ func putParams(c *gin.Context) {
 	}
 
 	idString := c.Query("id")
-	paramsJson := c.PostForm("params")
+	body, err := c.GetRawData()
+	if err != nil {
+		errorResponse(c, 400, "read body err: "+err.Error())
+		return
+	}
 
 	id, err := strconv.Atoi(idString)
 	if err != nil {
 		errorResponse(c, 400, "id err: "+err.Error())
+		return
 	}
 
-	err = engine.PutParams(id, paramsJson)
+	err = engine.PutParams(id, body)
 	if err != nil {
 		errorResponse(c, 400, err.Error())
+		return
 	}
 
 	successResponse(c, "Params updated")
@@ -148,6 +164,8 @@ func waitPrepare(c *gin.Context) {
 	if err != nil {
 		fatalErrHandel(c, err)
 	}
+	// Init the Plugin nodes
+	engine.InitPluginsNodes()
 
 	// Wait for the prepare signal
 	engine.WaitPrepare()
@@ -164,6 +182,7 @@ func runPlugins(c *gin.Context) {
 	err = engine.RunPlugins()
 	if err != nil {
 		errorResponse(c, 400, err.Error())
+		return
 	}
 
 	successResponse(c, "Plugins running")

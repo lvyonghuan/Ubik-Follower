@@ -150,9 +150,9 @@ func (engine *UFollower) detectPlugins() error {
 	return nil
 }
 
-func (engine *UFollower) PutParams(id int, paramsJson string) error {
+func (engine *UFollower) PutParams(id int, paramsJson []byte) error {
 	var params uplugin.Params
-	err := ujson.Unmarshal([]byte(paramsJson), &params)
+	err := ujson.Unmarshal(paramsJson, &params)
 	if err != nil {
 		return uerr.NewError(err)
 	}

@@ -17,15 +17,11 @@ func response(status int, info any) gin.H {
 }
 
 func successResponse(c *gin.Context, info any) {
-	marshalInfo, _ := ujson.Marshal(info)
-
-	c.JSON(http.StatusOK, response(200, marshalInfo))
+	c.JSON(http.StatusOK, response(200, info))
 }
 
 func errorResponse(c *gin.Context, status int, info any) {
-	marshalInfo, _ := ujson.Marshal(info)
-
-	c.JSON(http.StatusOK, response(status, marshalInfo))
+	c.JSON(http.StatusOK, response(status, info))
 }
 
 // fatalErrHandel handles fatal errors by logging them and returning a 500 response.
