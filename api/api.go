@@ -38,6 +38,8 @@ func InitAPI(engine *engine.UFollower, inTest bool) error {
 		api.GET("/info")                //get metadata of a plugin
 		api.PUT("/download")            //Download a plugin. Three steps: 1. download 2. unzip 3.init
 
+		api.PUT("/workflow", createWorkflow)    //create a new workflow
+		api.DELETE("/workflow", deleteWorkflow) //delete a workflow by name
 		node := api.Group("/node")
 		{
 			node.PUT("/", addRuntimeNode)       //create a runtime node

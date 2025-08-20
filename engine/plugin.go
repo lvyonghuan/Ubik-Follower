@@ -150,7 +150,7 @@ func (engine *UFollower) detectPlugins() error {
 	return nil
 }
 
-func (engine *UFollower) PutParams(id int, paramsJson []byte) error {
+func (engine *UFollower) PutParams(workflowName string, id int, paramsJson []byte) error {
 	var params uplugin.Params
 	err := ujson.Unmarshal(paramsJson, &params)
 	if err != nil {
@@ -158,10 +158,15 @@ func (engine *UFollower) PutParams(id int, paramsJson []byte) error {
 	}
 
 	//Check if the id already exists
-	if runtimeNode, isExist := engine.runtimeNodes[id]; !isExist {
-		return uerr.NewError(errors.New("runtime node" + fmt.Sprintf("%d", id) + "not exist"))
+	if workflow, isExist := engine.workflows[workflowName]; !isExist {
+		return uerr.NewError(errors.New("workflow " + workflowName + " does not exist"))
 	} else {
-		runtimeNode.params = params
+		runtimeNode, isExist := workflow[id]
+		if !isExist {
+			return uerr.NewError(errors.New("runtime node with id " + fmt.Sprint(id) + " does not exist in workflow " + workflowName))
+		} else {
+			runtimeNode.params = params
+		}
 	}
 
 	return nil

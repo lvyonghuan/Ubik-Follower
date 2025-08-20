@@ -138,8 +138,8 @@ func (engine *UFollower) createUUID(uuidPath string) error {
 func makeUFollower(config Config, inTest bool) (*UFollower, error) {
 	//Initialize the UFollower engine
 	engine := &UFollower{
-		Config:       config,
-		runtimeNodes: make(map[int]*RuntimeNode),
+		Config:    config,
+		workflows: make(map[string]runtimeNodes),
 		plugin: &plugin{
 			plugins:        make(map[string]*Plugin),
 			mountedPlugins: make(map[string]*Plugin),

@@ -18,6 +18,51 @@ func getPluginList(c *gin.Context) {
 	successResponse(c, plugins)
 }
 
+func createWorkflow(c *gin.Context) {
+	engine, err := getEngine(c)
+	if err != nil {
+		fatalErrHandel(c, err)
+		return
+	}
+
+	workflowName := c.Query("workflow_name")
+	if workflowName == "" {
+		errorResponse(c, 400, "workflow_name is required, but get empty")
+		return
+	}
+
+	err = engine.CreateWorkflow(workflowName)
+	if err != nil {
+		errorResponse(c, 400, "create workflow err: "+err.Error())
+		return
+	}
+
+	successResponse(c, "Workflow created successfully")
+}
+
+// DeleteWorkflow deletes a workflow by its name
+func deleteWorkflow(c *gin.Context) {
+	engine, err := getEngine(c)
+	if err != nil {
+		fatalErrHandel(c, err)
+		return
+	}
+
+	workflowName := c.Query("workflow_name")
+	if workflowName == "" {
+		errorResponse(c, 400, "workflow_name is required, but get empty")
+		return
+	}
+
+	err = engine.DeleteWorkflow(workflowName)
+	if err != nil {
+		errorResponse(c, 400, "delete workflow err: "+err.Error())
+		return
+	}
+
+	successResponse(c, "Workflow deleted successfully")
+}
+
 func addRuntimeNode(c *gin.Context) {
 	engine, err := getEngine(c)
 	if err != nil {
@@ -27,14 +72,28 @@ func addRuntimeNode(c *gin.Context) {
 	pluginName := c.Query("plugin_name")
 	nodeName := c.Query("node_name")
 	idString := c.Query("id")
+	workflowName := c.Query("workflow_name")
 
+	// Check validation
 	id, err := strconv.Atoi(idString)
 	if err != nil {
 		errorResponse(c, 400, "id err: "+err.Error())
 		return
 	}
+	if pluginName == "" {
+		errorResponse(c, 400, "plugin_name is required, but get empty")
+		return
+	}
+	if nodeName == "" {
+		errorResponse(c, 400, "node_name is required, but get empty")
+		return
+	}
+	if workflowName == "" {
+		errorResponse(c, 400, "workflow_name is required, but get empty")
+		return
+	}
 
-	err = engine.NewRuntimeNode(pluginName, nodeName, id)
+	err = engine.NewRuntimeNode(workflowName, pluginName, nodeName, id)
 	if err != nil {
 		errorResponse(c, 400, err.Error())
 		return
@@ -50,14 +109,20 @@ func deleteRuntimeNode(c *gin.Context) {
 	}
 
 	idString := c.Query("id")
+	workflowName := c.Query("workflow_name")
 
+	// Check validation
 	id, err := strconv.Atoi(idString)
 	if err != nil {
 		errorResponse(c, 400, "id err: "+err.Error())
 		return
 	}
+	if workflowName == "" {
+		errorResponse(c, 400, "workflow_name is required, but get empty")
+		return
+	}
 
-	err = engine.DeleteRuntimeNode(id)
+	err = engine.DeleteRuntimeNode(workflowName, id)
 	if err != nil {
 		errorResponse(c, 400, err.Error())
 		return
@@ -77,20 +142,37 @@ func updateEdge(c *gin.Context) {
 	producerPortName := c.Query("producer_port_name")
 	consumerPortName := c.Query("consumer_port_name")
 	addr := c.Query("addr")
+	workflowName := c.Query("workflow_name")
 
+	// Check validation
 	producerID, err := strconv.Atoi(producerIDString)
 	if err != nil {
 		errorResponse(c, 400, "producer_id err: "+err.Error())
 		return
 	}
-
 	consumerID, err := strconv.Atoi(consumerIDString)
 	if err != nil {
 		errorResponse(c, 400, "consumer_id err: "+err.Error())
 		return
 	}
+	if producerPortName == "" {
+		errorResponse(c, 400, "producer_port_name is required, but get empty")
+		return
+	}
+	if consumerPortName == "" {
+		errorResponse(c, 400, "consumer_port_name is required, but get empty")
+		return
+	}
+	if addr == "" {
+		errorResponse(c, 400, "addr is required, but get empty")
+		return
+	}
+	if workflowName == "" {
+		errorResponse(c, 400, "workflow_name is required, but get empty")
+		return
+	}
 
-	err = engine.UpdateEdge(producerID, consumerID, producerPortName, consumerPortName, addr)
+	err = engine.UpdateEdge(workflowName, producerID, consumerID, producerPortName, consumerPortName, addr)
 	if err != nil {
 		errorResponse(c, 400, err.Error())
 		return
@@ -109,20 +191,33 @@ func deleteEdge(c *gin.Context) {
 	consumerIDString := c.Query("consumer_id")
 	producerPortName := c.Query("producer_port_name")
 	consumerPortName := c.Query("consumer_port_name")
+	workflowName := c.Query("workflow_name")
 
+	// Check validation
 	producerID, err := strconv.Atoi(producerIDString)
 	if err != nil {
 		errorResponse(c, 400, "producer_id should be an integer")
 		return
 	}
-
 	consumerID, err := strconv.Atoi(consumerIDString)
 	if err != nil {
 		errorResponse(c, 400, "consumer_id should be an integer")
 		return
 	}
+	if producerPortName == "" {
+		errorResponse(c, 400, "producer_port_name is required, but get empty")
+		return
+	}
+	if consumerPortName == "" {
+		errorResponse(c, 400, "consumer_port_name is required, but get empty")
+		return
+	}
+	if workflowName == "" {
+		errorResponse(c, 400, "workflow_name is required, but get empty")
+		return
+	}
 
-	err = engine.DeleteEdge(producerID, consumerID, producerPortName, consumerPortName)
+	err = engine.DeleteEdge(workflowName, producerID, consumerID, producerPortName, consumerPortName)
 	if err != nil {
 		errorResponse(c, 400, err.Error())
 		return
@@ -138,19 +233,26 @@ func putParams(c *gin.Context) {
 	}
 
 	idString := c.Query("id")
+	workflowName := c.Query("workflow_name")
+
 	body, err := c.GetRawData()
 	if err != nil {
 		errorResponse(c, 400, "read body err: "+err.Error())
 		return
 	}
 
+	// Check validation
 	id, err := strconv.Atoi(idString)
 	if err != nil {
 		errorResponse(c, 400, "id err: "+err.Error())
 		return
 	}
+	if workflowName == "" {
+		errorResponse(c, 400, "workflow_name is required, but get empty")
+		return
+	}
 
-	err = engine.PutParams(id, body)
+	err = engine.PutParams(workflowName, id, body)
 	if err != nil {
 		errorResponse(c, 400, err.Error())
 		return

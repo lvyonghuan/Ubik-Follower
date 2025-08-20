@@ -15,54 +15,59 @@ func TestRunPlugin(t *testing.T) {
 	go api.InitAPI(e, true)
 	time.Sleep(5 * time.Second)
 
-	err := e.NewRuntimeNode("AddNum", "startNode", 1)
+	err := e.CreateWorkflow("testWorkflow")
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = e.NewRuntimeNode("testWorkflow", "AddNum", "startNode", 1)
 	if err != nil {
 		t.Error(err)
 	}
 
 	time.Sleep(5 * time.Second)
 
-	err = e.NewRuntimeNode("AddNum", "selfIncreasingNode", 2)
+	err = e.NewRuntimeNode("testWorkflow", "AddNum", "selfIncreasingNode", 2)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = e.NewRuntimeNode("AddNum", "sumNode", 3)
+	err = e.NewRuntimeNode("testWorkflow", "AddNum", "sumNode", 3)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = e.NewRuntimeNode("AddNum", "selfIncreasingNode", 4)
+	err = e.NewRuntimeNode("testWorkflow", "AddNum", "selfIncreasingNode", 4)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = e.UpdateEdge(1, 3, "num_a", "num_a", "http://localhost:14535")
+	err = e.UpdateEdge("testWorkflow", 1, 3, "num_a", "num_a", "http://localhost:14535")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = e.UpdateEdge(1, 2, "num_a", "input", "http://localhost:14535")
+	err = e.UpdateEdge("testWorkflow", 1, 2, "num_a", "input", "http://localhost:14535")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = e.UpdateEdge(2, 3, "num_b", "num_b", "http://localhost:14535")
+	err = e.UpdateEdge("testWorkflow", 2, 3, "num_b", "num_b", "http://localhost:14535")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = e.UpdateEdge(1, 4, "cycle_num", "input", "http://localhost:14535")
+	err = e.UpdateEdge("testWorkflow", 1, 4, "cycle_num", "input", "http://localhost:14535")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = e.UpdateEdge(4, 1, "num_b", "current_cycle_num", "http://localhost:14535")
+	err = e.UpdateEdge("testWorkflow", 4, 1, "num_b", "current_cycle_num", "http://localhost:14535")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = e.UpdateEdge(3, 1, "sum", "num_a", "http://localhost:14535")
+	err = e.UpdateEdge("testWorkflow", 3, 1, "sum", "num_a", "http://localhost:14535")
 	if err != nil {
 		t.Error(err)
 	}
@@ -75,7 +80,7 @@ func TestRunPlugin(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = e.PutParams(1, paramsJson)
+	err = e.PutParams("testWorkflow", 1, paramsJson)
 	if err != nil {
 		t.Error(err)
 	}

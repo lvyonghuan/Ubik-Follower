@@ -19,10 +19,14 @@ type UFollower struct {
 
 	plugin *plugin
 
-	runtimeNodes map[int]*RuntimeNode
+	//FIXME: 修正逻辑到多工作流图模式，每个工作流作为一个独立的可并发的运行域
+	workflows map[string]runtimeNodes
 
 	heartbeat *heartbeat
 }
+
+// runtimeNodes is workflow
+type runtimeNodes map[int]*RuntimeNode
 
 type plugin struct {
 	plugins        map[string]*Plugin

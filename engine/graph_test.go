@@ -2,6 +2,8 @@ package engine
 
 import "testing"
 
+// FIXME: 现在的逻辑要求必须先和 leader 建立联系。测试需要重写。
+
 func TestAddNode(t *testing.T) {
 	uFollower := InitEngine(true)
 

@@ -15,7 +15,7 @@ import (
 //The graph consists of a series of runtime nodes and directed edges.
 
 // NewRuntimeNode creates a new runtime node.
-func (engine *UFollower) NewRuntimeNode(pluginName, nodeName string, id int) error {
+func (engine *UFollower) NewRuntimeNode(workflowName, pluginName, nodeName string, id int) error {
 	plugin, isExist := engine.plugin.plugins[pluginName]
 	if !isExist {
 		return uerr.NewError(errors.New("plugin " + pluginName + " not exist"))
@@ -34,11 +34,15 @@ func (engine *UFollower) NewRuntimeNode(pluginName, nodeName string, id int) err
 	}
 
 	//Add the runtime node to the follower's runtime node map
-	//Check if the id already exists
-	if _, isExist := engine.runtimeNodes[id]; isExist {
-		return uerr.NewError(errors.New("runtime node id " + strconv.Itoa(id) + " already exist"))
+	//Check if the id already exists and if the workflow exists
+	if workflow, isExist := engine.workflows[workflowName]; !isExist {
+		return uerr.NewError(errors.New("workflow " + workflowName + " not exist"))
+	} else {
+		if _, isExist := workflow[id]; isExist {
+			return uerr.NewError(errors.New("runtime node with id " + strconv.Itoa(id) + " already exists in workflow " + workflowName))
+		}
 	}
-	engine.runtimeNodes[id] = runtimeNode
+	engine.workflows[workflowName][id] = runtimeNode
 	engine.plugin.plugins[pluginName].runtimeNodes[id] = runtimeNode //Mount node under the plugin
 
 	//Check if the plugin is already mounted
@@ -51,27 +55,31 @@ func (engine *UFollower) NewRuntimeNode(pluginName, nodeName string, id int) err
 }
 
 // DeleteRuntimeNode deletes a runtime node.
-func (engine *UFollower) DeleteRuntimeNode(id int) error {
-	if runtimeNode, isExist := engine.runtimeNodes[id]; !isExist {
-		return uerr.NewError(errors.New("runtime node" + strconv.Itoa(id) + "not exist"))
+func (engine *UFollower) DeleteRuntimeNode(workflowName string, id int) error {
+	if workflow, isExist := engine.workflows[workflowName]; !isExist {
+		return uerr.NewError(errors.New("workflow " + workflowName + " not exist"))
 	} else {
-		//delete output edges
-		for portName, edges := range runtimeNode.OutputEdges {
-			for _, edge := range edges {
-				err := engine.DeleteEdge(id, edge.ConsumerID, portName, edge.ConsumerPortName)
-				if err != nil {
-					engine.Log.Error(err)
-					continue
+		if runtimeNode, isExist := workflow[id]; !isExist {
+			return uerr.NewError(errors.New("runtime node with id " + strconv.Itoa(id) + " not exist in workflow " + workflowName))
+		} else {
+			//delete the runtime node from the workflow
+			for portName, edges := range runtimeNode.OutputEdges {
+				for _, edge := range edges {
+					err := engine.deleteEdge(workflow, id, edge.ConsumerID, portName, edge.ConsumerPortName)
+					if err != nil {
+						engine.Log.Error(err)
+						continue
+					}
 				}
 			}
-		}
 
-		//delete the runtime node from the plugin's runtime node map
-		delete(runtimeNode.pluginInfo.runtimeNodes, id)
+			//delete the runtime node from the plugin's runtime node map
+			delete(runtimeNode.pluginInfo.runtimeNodes, id)
+		}
 	}
 
 	//delete the runtime node from the follower's runtime node map
-	delete(engine.runtimeNodes, id)
+	delete(engine.workflows[workflowName], id)
 
 	//TODO design the unmount plugin logic. Not just ==0 unmount
 	//go engine.checkUnmount(engine.runtimeNodes[id].pluginInfo)
@@ -82,8 +90,13 @@ func (engine *UFollower) DeleteRuntimeNode(id int) error {
 }
 
 // UpdateEdge updates the edge between two runtime nodes.
-func (engine *UFollower) UpdateEdge(producerID, consumerID int, producerPortName, consumerPortName, uri string) error {
-	producer, isExist := engine.runtimeNodes[producerID]
+func (engine *UFollower) UpdateEdge(workflowName string, producerID, consumerID int, producerPortName, consumerPortName, uri string) error {
+	workflow, isExist := engine.workflows[workflowName]
+	if !isExist {
+		return uerr.NewError(errors.New("workflow " + workflowName + " not exist"))
+	}
+
+	producer, isExist := workflow[producerID]
 	if !isExist {
 		return uerr.NewError(errors.New("producer runtime node " + strconv.Itoa(producerID) + " not exist"))
 	}
@@ -105,8 +118,22 @@ func (engine *UFollower) UpdateEdge(producerID, consumerID int, producerPortName
 }
 
 // DeleteEdge deletes the edge between two runtime nodes.
-func (engine *UFollower) DeleteEdge(producerID, consumerID int, producerPortName, consumerPortName string) error {
-	producer, isExist := engine.runtimeNodes[producerID]
+func (engine *UFollower) DeleteEdge(workflowName string, producerID, consumerID int, producerPortName, consumerPortName string) error {
+	workflow, isExist := engine.workflows[workflowName]
+	if !isExist {
+		return uerr.NewError(errors.New("workflow " + workflowName + " not exist"))
+	}
+
+	err := engine.deleteEdge(workflow, producerID, consumerID, producerPortName, consumerPortName)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (engine *UFollower) deleteEdge(workflow runtimeNodes, producerID, consumerID int, producerPortName, consumerPortName string) error {
+	producer, isExist := workflow[producerID]
 	if !isExist {
 		return uerr.NewError(errors.New("producer runtime node " + strconv.Itoa(producerID) + " not exist"))
 	}
@@ -124,7 +151,6 @@ func (engine *UFollower) DeleteEdge(producerID, consumerID int, producerPortName
 	}
 
 	engine.Log.Debug("Edge deleted between runtime node " + strconv.Itoa(producerID) + " and " + strconv.Itoa(consumerID))
-
 	return nil
 }
 

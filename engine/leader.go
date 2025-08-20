@@ -101,6 +101,7 @@ func (engine *UFollower) postPlugins() error {
 	return nil
 }
 
+// Heartbeat is a struct that manages the heartbeat mechanism for the follower
 type heartbeat struct {
 	conn     *net.UDPConn
 	interval time.Duration
